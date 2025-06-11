@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block additional_styles %}
+    .hero {
+        text-align: center;
+        padding: 4rem 0;
+        background-color: var(--bg-secondary);
+        border-radius: 15px;
+        margin-bottom: 3rem;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+    }
+
+    .cta-button {
+        display: inline-block;
+        background-color: var(--accent-color);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s;
+    }
+
+    .cta-button:hover {
+        background-color: #cc0000;
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .feature-card {
+        background-color: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        color: var(--accent-color);
+        margin-bottom: 1rem;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .feature-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .how-to {
+        background-color: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 3rem;
+    }
+
+    .how-to-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        color: var(--text-primary);
+    }
+
+    .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .step {
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .step-number {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        background-color: var(--accent-color);
+        color: white;
+        border-radius: 50%;
+        margin-bottom: 1rem;
+    }
+
+    .step-description {
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .hero {
+            padding: 2rem 1rem;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .features {
+            grid-template-columns: 1fr;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="hero">
+        <h1 class="hero-title">YouTube CC Extractor</h1>
+        <p class="hero-subtitle">استخرج وحفظ الترجمات من فيديوهات يوتيوب بسهولة</p>
+        <a href="{{ url_for('extract') }}" class="cta-button">ابدأ الآن</a>
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <i class="fas fa-closed-captioning feature-icon"></i>
+            <h3 class="feature-title">ترجمات متعددة</h3>
+            <p class="feature-description">
+                دعم للترجمات اليدوية والتلقائية
+                باللغتين العربية والإنجليزية
+            </p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-save feature-icon"></i>
+            <h3 class="feature-title">حفظ وأرشفة</h3>
+            <p class="feature-description">
+                إمكانية حفظ الترجمات للرجوع إليها لاحقاً
+                مع معلومات الفيديو الكاملة
+            </p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-magic feature-icon"></i>
+            <h3 class="feature-title">سهل الاستخدام</h3>
+            <p class="feature-description">
+                واجهة بسيطة وسهلة الاستخدام
+                مع دعم للوضع الليلي والنهاري
+            </p>
+        </div>
+    </section>
+
+    <section class="how-to">
+        <h2 class="how-to-title">كيفية الاستخدام</h2>
+        <div class="steps">
+            <div class="step">
+                <span class="step-number">1</span>
+                <p class="step-description">انسخ رابط فيديو اليوتيوب الذي تريد استخراج الترجمة منه</p>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <p class="step-description">الصق الرابط في صفحة استخراج الترجمة واختر نوع الترجمة (يدوية أو تلقائية)</p>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <p class="step-description">احفظ الترجمة أو انسخها مباشرة من الموقع</p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+    <script>
+        let currentVideoId = '';
+        let currentVideoInfo = null;
+        let currentCCType = '';
+
+        function showStatus(message, isError) {
+            const statusElement = document.getElementById('status-message');
+            statusElement.textContent = message;
+            statusElement.className = isError ? 'error' : 'success';
+            statusElement.style.display = 'block';
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function extractVideoId(url) {
+            const patterns = [
+                /(?:v=|v\/|embed\/|youtu\.be\/)([^"&?\/\s]{11})/,
+                /(?:watch\?|v=)([^"&?\/\s]{11})/,
+                /([^"&?\/\s]{11})/
+            ];
+
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) {
+                    return match[1];
+                }
+            }
+            return null;
+        }
+
+        async function fetchVideoInfo() {
+            const urlInput = document.getElementById('url');
+            const videoUrl = urlInput.value.trim();
+            
+            if (!videoUrl) return;
+            
+            const videoId = extractVideoId(videoUrl);
+            if (!videoId) {
+                showStatus('الرجاء إدخال رابط يوتيوب صحيح', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/video_info/${videoId}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showStatus(data.error, true);
+                    return;
+                }
+
+                document.getElementById('video-thumbnail').src = data.thumbnail_url;
+                document.getElementById('thumbnail-link').href = data.thumbnail_max_res;
+                document.getElementById('video-title').textContent = data.title;
+                document.getElementById('video-views').textContent = data.views;
+                document.getElementById('video-duration').textContent = data.duration;
+                document.getElementById('channel-link').textContent = data.channel_title;
+                document.getElementById('channel-link').href = data.channel_url;
+                
+                document.getElementById('video-info').style.display = 'block';
+            } catch (error) {
+                showStatus('حدث خطأ أثناء جلب معلومات الفيديو', true);
+            }
+        }
+
+        async function getCC(type) {
+            const urlInput = document.getElementById('url');
+            const youtubeUrl = urlInput.value.trim();
+            
+            if (!youtubeUrl) {
+                showStatus('الرجاء إدخال رابط الفيديو', true);
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('status-message').style.display = 'none';
+
+            try {
+                currentVideoId = extractVideoId(youtubeUrl);
+                if (!currentVideoId) {
+                    showStatus('رابط يوتيوب غير صالح', true);
+                    return;
+                }
+
+                const videoInfoResponse = await fetch(`/video_info/${currentVideoId}`);
+                const videoInfoData = await videoInfoResponse.json();
+                if (videoInfoData.error) {
+                    showStatus(videoInfoData.error, true);
+                    return;
+                }
+                currentVideoInfo = videoInfoData;
+
+                const response = await fetch('/get-cc', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `youtube_url=${encodeURIComponent(youtubeUrl)}&cc_type=${type}`
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showStatus(data.error, true);
+                } else {
+                    document.getElementById('cc-text').textContent = data.cc_text;
+                    document.getElementById('cc-type-label').textContent = `الترجمة ${data.cc_type}`;
+                    document.getElementById('result-container').style.display = 'block';
+                    document.getElementById('copy-btn').style.display = 'block';
+                    document.getElementById('save-btn').style.display = 'block';
+                    currentCCType = type;
+                }
+            } catch (error) {
+                showStatus('حدث خطأ أثناء استخراج الترجمة', true);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function changeDirection(direction) {
+            const ccText = document.getElementById('cc-text');
+            const rtlBtn = document.getElementById('rtl-btn');
+            const ltrBtn = document.getElementById('ltr-btn');
+            
+            ccText.dir = direction;
+            
+            if (direction === 'rtl') {
+                rtlBtn.classList.add('active');
+                ltrBtn.classList.remove('active');
+            } else {
+                ltrBtn.classList.add('active');
+                rtlBtn.classList.remove('active');
+            }
+        }
+
+        function copyText() {
+            const ccText = document.getElementById('cc-text').textContent;
+            navigator.clipboard.writeText(ccText).then(() => {
+                showStatus('تم نسخ النص بنجاح!', false);
+            }).catch(() => {
+                showStatus('حدث خطأ أثناء نسخ النص', true);
+            });
+        }
+
+        async function saveCC() {
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = true;
+            
+            try {
+                const ccContent = document.getElementById('cc-text').textContent;
+                
+                if (!currentVideoId || !currentVideoInfo || !ccContent || !currentCCType) {
+                    throw new Error('بيانات الفيديو غير مكتملة');
+                }
+                
+                const response = await fetch('/save-cc', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        video_id: currentVideoId,
+                        video_info: currentVideoInfo,
+                        cc_data: ccContent,
+                        cc_type: currentCCType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showStatus(data.error, true);
+                } else {
+                    showStatus(data.message, false);
+                }
+            } catch (error) {
+                showStatus(error.message || 'حدث خطأ أثناء حفظ البيانات', true);
+            } finally {
+                saveBtn.disabled = false;
+            }
+        }
+    </script>
+{% endblock %}

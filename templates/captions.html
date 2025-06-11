@@ -1,0 +1,906 @@
+{% extends "base.html" %}
+
+{% block additional_styles %}
+    .search-section {
+        background-color: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .search-container {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+    }
+
+    .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .view-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .view-btn.active {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
+    }
+
+    .filter-sort {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-select, .sort-select {
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        border-radius: 5px;
+    }
+
+    /* Grid View Styles */
+    .grid-view {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .caption-card {
+        background-color: var(--bg-secondary);
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.3s;
+    }
+
+    .caption-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-thumbnail {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .card-content {
+        padding: 1rem;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .card-info {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-matches {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.8rem;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .card-btn {
+        flex: 1;
+        padding: 0.5rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s;
+    }
+
+    .view-btn {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    /* List View Styles */
+    .list-view {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .caption-row {
+        background-color: var(--bg-secondary);
+        padding: 1rem;
+        border-radius: 10px;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .row-content {
+        flex: 1;
+    }
+
+    .row-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .row-matches {
+        margin: 1rem 0;
+    }
+
+    .match-context {
+        background-color: var(--bg-primary);
+        padding: 0.5rem;
+        border-radius: 5px;
+        margin-bottom: 0.5rem;
+        font-family: monospace;
+    }
+
+    .match-highlight {
+        background-color: rgba(255, 0, 0, 0.2);
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+    }
+
+    .match-nav {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    .match-nav button {
+        background: none;
+        border: none;
+        color: var(--accent-color);
+        cursor: pointer;
+    }
+
+    .match-nav button:disabled {
+        color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+    }
+
+    .modal-backdrop {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: var(--bg-primary);
+        margin: 3% auto;
+        width: 90%;
+        max-width: 1000px;
+        border-radius: 15px;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-5%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+    }
+
+    .modal-title {
+        margin: 0;
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .modal-title a {
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .modal-title a:hover {
+        color: var(--accent-color);
+    }
+
+    .channel-link {
+        color: var(--text-secondary) !important;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .channel-link:hover {
+        color: var(--accent-color) !important;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-close:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: calc(90vh - 70px);
+    }
+
+    .video-info {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: var(--bg-primary);
+    }
+
+    .video-thumbnail {
+        width: 280px;
+        height: 157px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .video-details p {
+        margin: 0;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .video-details i {
+        width: 20px;
+        text-align: center;
+        color: var(--accent-color);
+    }
+
+    .caption-container {
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-secondary);
+        border-radius: 10px;
+        margin: 0 1.5rem 1.5rem;
+    }
+
+    .caption-text {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        margin: 0;
+        white-space: pre-wrap;
+        font-family: monospace;
+        line-height: 1.6;
+        color: var(--text-primary);
+        direction: rtl;
+        background: var(--bg-primary);
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        transition: font-size 0.2s ease;
+    }
+
+    .caption-text::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .caption-text::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+        border-radius: 4px;
+    }
+
+    .caption-text::-webkit-scrollbar-thumb {
+        background: var(--accent-color);
+        border-radius: 4px;
+    }
+
+    .caption-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .copy-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .copy-btn i {
+        font-size: 1.1rem;
+    }
+
+    .font-size-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem;
+        background: var(--bg-secondary);
+        border-radius: 6px;
+        width: fit-content;
+        margin-right: auto;
+    }
+
+    .font-control-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: none;
+        background: var(--accent-color);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        padding: 0;
+    }
+
+    .font-control-btn i {
+        font-size: 0.7rem;
+    }
+
+    .font-size-display {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0 0.25rem;
+        min-width: 35px;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .search-container {
+            flex-direction: column;
+        }
+
+        .filter-sort {
+            flex-direction: column;
+        }
+
+        .grid-view {
+            grid-template-columns: 1fr;
+        }
+
+        .caption-row {
+            flex-direction: column;
+        }
+
+        .modal-content {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+            border-radius: 0;
+        }
+
+        .video-info {
+            flex-direction: column;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 200px;
+        }
+
+        .caption-container {
+            margin: 0 1rem 1rem;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="search-section">
+        <div class="search-container">
+            <input type="text" class="search-input" id="search-input" placeholder="ابحث في عناوين الفيديو أو نص الترجمة...">
+        </div>
+        
+        <div class="view-toggle">
+            <button class="view-btn active" onclick="toggleView('grid')">
+                <i class="fas fa-th-large"></i> عرض شبكي
+            </button>
+            <button class="view-btn" onclick="toggleView('list')">
+                <i class="fas fa-list"></i> عرض نصي
+            </button>
+        </div>
+
+        <div class="filter-sort">
+            <select class="filter-select" id="cc-type-filter">
+                <option value="all">كل الترجمات</option>
+                <option value="manual">الترجمات اليدوية</option>
+                <option value="auto">الترجمات التلقائية</option>
+            </select>
+
+            <select class="sort-select" id="sort-by">
+                <option value="newest">الأحدث أولاً</option>
+                <option value="oldest">الأقدم أولاً</option>
+                <option value="title">عنوان الفيديو</option>
+                <option value="matches">عدد النتائج</option>
+            </select>
+        </div>
+    </section>
+
+    <!-- Grid View -->
+    <div class="grid-view" id="grid-view">
+        <!-- سيتم إضافة البطاقات هنا بواسطة JavaScript -->
+    </div>
+
+    <!-- List View -->
+    <div class="list-view" id="list-view">
+        <!-- سيتم إضافة الصفوف هنا بواسطة JavaScript -->
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="captionModal" class="modal">
+    <div class="modal-backdrop" onclick="closeModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">
+                <!-- سيتم إضافة الرابط هنا عبر JavaScript -->
+            </h2>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="video-info">
+                <img id="modalThumbnail" class="video-thumbnail" src="" alt="">
+                <div class="video-details">
+                    <p>
+                        <i class="fas fa-user"></i>
+                        <a href="#" class="channel-link" id="modalChannel" target="_blank"></a>
+                    </p>
+                    <p><i class="fas fa-eye"></i> <span id="modalViews"></span></p>
+                    <p><i class="fas fa-clock"></i> <span id="modalDuration"></span></p>
+                    <p><i class="fas fa-closed-captioning"></i> <span id="modalCCType"></span></p>
+                </div>
+            </div>
+            <div class="caption-container">
+                <div class="font-size-controls">
+                    <button class="font-control-btn" onclick="changeFontSize(-1)" id="decreaseFontBtn" title="تصغير الخط">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="font-size-display" id="fontSizeDisplay">16px</span>
+                    <button class="font-control-btn" onclick="changeFontSize(1)" id="increaseFontBtn" title="تكبير الخط">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <pre id="captionText" class="caption-text"></pre>
+                <div class="caption-actions">
+                    <button class="copy-btn" onclick="copyCaption()">
+                        <i class="fas fa-copy"></i>
+                        <span>نسخ الترجمة</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+    let currentView = 'grid';
+    let captions = [];  // تخزين جميع الترجمات
+    let filteredCaptions = [];  // تخزين الترجمات بعد التصفية
+    let currentSearchResults = {};
+
+    // حفظ تفضيل طريقة العرض
+    const savedView = localStorage.getItem('captionsView') || 'grid';
+    toggleView(savedView);
+
+    function toggleView(view) {
+        const gridView = document.getElementById('grid-view');
+        const listView = document.getElementById('list-view');
+        const gridBtn = document.querySelector('.view-btn:first-child');
+        const listBtn = document.querySelector('.view-btn:last-child');
+
+        currentView = view;
+        localStorage.setItem('captionsView', view);
+
+        if (view === 'grid') {
+            gridView.style.display = 'grid';
+            listView.style.display = 'none';
+            gridBtn.classList.add('active');
+            listBtn.classList.remove('active');
+        } else {
+            gridView.style.display = 'none';
+            listView.style.display = 'flex';
+            gridBtn.classList.remove('active');
+            listBtn.classList.add('active');
+        }
+    }
+
+    async function loadCaptions() {
+        try {
+            const response = await fetch('/get-captions');
+            captions = await response.json();
+            filterCaptions();  // تطبيق الفلتر الأولي
+        } catch (error) {
+            console.error('Error loading captions:', error);
+        }
+    }
+
+    function filterCaptions() {
+        const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+        const typeFilter = document.getElementById('cc-type-filter').value;
+        const sortBy = document.getElementById('sort-by').value;
+
+        // إعادة تعيين نتائج البحث
+        currentSearchResults = {};
+
+        // تطبيق الفلترة
+        filteredCaptions = captions.filter(caption => {
+            const matchesType = typeFilter === 'all' || caption.cc_type === typeFilter;
+            
+            if (!searchQuery) return matchesType; // إذا لم يكن هناك بحث، اعرض حسب النوع فقط
+
+            // البحث في العنوان
+            const title = caption.video_info.title.toLowerCase();
+            const searchTerms = searchQuery.split(' ');
+            const matchesTitle = searchTerms.every(term => title.includes(term));
+            
+            // البحث في نص الترجمة
+            const ccText = caption.cc_data.toLowerCase();
+            const lines = ccText.split('\n');
+            const matches = [];
+            
+            lines.forEach((line, lineIndex) => {
+                // إذا وجدت أي كلمة من كلمات البحث في هذا السطر
+                if (searchTerms.some(term => line.includes(term))) {
+                    // أضف السطر السابق والتالي للسياق
+                    const start = Math.max(0, lineIndex - 1);
+                    const end = Math.min(lines.length - 1, lineIndex + 1);
+                    matches.push({
+                        line: lineIndex,
+                        context: lines.slice(start, end + 1).join('\n')
+                    });
+                }
+            });
+            
+            if (matches.length > 0) {
+                currentSearchResults[caption.video_id] = matches;
+            }
+
+            return matchesType && (matchesTitle || matches.length > 0);
+        });
+
+        // تطبيق الترتيب
+        filteredCaptions.sort((a, b) => {
+            switch (sortBy) {
+                case 'newest':
+                    return new Date(b.timestamp) - new Date(a.timestamp);
+                case 'oldest':
+                    return new Date(a.timestamp) - new Date(b.timestamp);
+                case 'title':
+                    return a.video_info.title.localeCompare(b.video_info.title);
+                case 'matches':
+                    const aMatches = currentSearchResults[a.video_id]?.length || 0;
+                    const bMatches = currentSearchResults[b.video_id]?.length || 0;
+                    return bMatches - aMatches;
+                default:
+                    return 0;
+            }
+        });
+
+        // تحديث العرض
+        updateDisplay();
+    }
+
+    function highlightMatch(text, query) {
+        if (!query) return text;
+        
+        // تقسيم النص البحثي إلى كلمات
+        const terms = query.toLowerCase().split(' ');
+        
+        // استبدال كل كلمة بحث بنفس النص محاطاً بوسم التمييز
+        let highlightedText = text;
+        terms.forEach(term => {
+            const regex = new RegExp(`(${term})`, 'gi');
+            highlightedText = highlightedText.replace(regex, '<span class="match-highlight">$1</span>');
+        });
+        
+        return highlightedText;
+    }
+
+    function updateDisplay() {
+        if (currentView === 'grid') {
+            updateGridView();
+        } else {
+            updateListView();
+        }
+    }
+
+    function updateGridView() {
+        const gridView = document.getElementById('grid-view');
+        
+        if (filteredCaptions.length === 0) {
+            gridView.innerHTML = '<div class="no-results">لا توجد نتائج</div>';
+            return;
+        }
+
+        gridView.innerHTML = filteredCaptions.map(caption => `
+            <div class="caption-card">
+                <img src="${caption.video_info.thumbnail_url}" alt="" class="card-thumbnail">
+                <div class="card-content">
+                    <h3 class="card-title">${caption.video_info.title}</h3>
+                    <p class="card-info">
+                        المشاهدات: ${caption.video_info.views}<br>
+                        المدة: ${caption.video_info.duration}<br>
+                        نوع الترجمة: ${caption.cc_type === 'manual' ? 'يدوية' : 'تلقائية'}
+                    </p>
+                    ${currentSearchResults[caption.video_id] ? `
+                        <span class="card-matches">
+                            ${currentSearchResults[caption.video_id].length} نتيجة
+                        </span>
+                    ` : ''}
+                    <div class="card-actions">
+                        <button class="card-btn view-btn" onclick="viewCaption('${caption.video_id}')">
+                            <i class="fas fa-eye"></i> عرض
+                        </button>
+                        <button class="card-btn delete-btn" onclick="deleteCaption('${caption.video_id}')">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateListView() {
+        const listView = document.getElementById('list-view');
+        
+        if (filteredCaptions.length === 0) {
+            listView.innerHTML = '<div class="no-results">لا توجد نتائج</div>';
+            return;
+        }
+
+        listView.innerHTML = filteredCaptions.map(caption => `
+            <div class="caption-row">
+                <div class="row-content">
+                    <h3 class="row-title">${caption.video_info.title}</h3>
+                    <p class="card-info">
+                        نوع الترجمة: ${caption.cc_type === 'manual' ? 'يدوية' : 'تلقائية'} |
+                        المشاهدات: ${caption.video_info.views} |
+                        المدة: ${caption.video_info.duration}
+                    </p>
+                    ${currentSearchResults[caption.video_id] ? `
+                        <div class="row-matches">
+                            ${currentSearchResults[caption.video_id].map((match, index) => `
+                                <div class="match-context">
+                                    ${highlightMatch(match.context, document.getElementById('search-input').value)}
+                                </div>
+                            `).join('')}
+                            <div class="match-nav">
+                                <span>${currentSearchResults[caption.video_id].length} نتيجة</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    <div class="card-actions">
+                        <button class="card-btn view-btn" onclick="viewCaption('${caption.video_id}')">
+                            <i class="fas fa-eye"></i> عرض
+                        </button>
+                        <button class="card-btn delete-btn" onclick="deleteCaption('${caption.video_id}')">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function viewCaption(videoId) {
+        const caption = captions.find(c => c.video_id === videoId);
+        if (!caption) return;
+
+        // إعادة تعيين حجم الخط الافتراضي عند فتح نافذة جديدة
+        currentFontSize = 16;
+        updateFontSize();
+
+        // تحديث بيانات Modal
+        const modalTitle = document.getElementById('modalTitle');
+        modalTitle.innerHTML = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">${caption.video_info.title}</a>`;
+        
+        document.getElementById('modalThumbnail').src = caption.video_info.thumbnail_max_res || caption.video_info.thumbnail_url;
+        
+        const channelLink = document.getElementById('modalChannel');
+        channelLink.href = `https://www.youtube.com/channel/${caption.video_info.channel_id}`;
+        channelLink.textContent = caption.video_info.channel_title;
+        
+        document.getElementById('modalViews').textContent = caption.video_info.views;
+        document.getElementById('modalDuration').textContent = caption.video_info.duration;
+        document.getElementById('modalCCType').textContent = caption.cc_type === 'manual' ? 'ترجمة يدوية' : 'ترجمة تلقائية';
+        document.getElementById('captionText').textContent = caption.cc_data;
+
+        // عرض Modal
+        const modal = document.getElementById('captionModal');
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('captionModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // استعادة التمرير
+    }
+
+    // إضافة مستمع لمفتاح ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    function copyCaption() {
+        const captionText = document.getElementById('captionText').textContent;
+        navigator.clipboard.writeText(captionText).then(() => {
+            const copyBtn = document.querySelector('.copy-btn');
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="fas fa-check"></i><span>تم النسخ!</span>';
+            copyBtn.style.backgroundColor = '#28a745';
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHTML;
+                copyBtn.style.backgroundColor = '';
+            }, 2000);
+        }).catch(err => {
+            console.error('فشل نسخ النص:', err);
+            alert('حدث خطأ أثناء نسخ النص');
+        });
+    }
+
+    // إضافة متغيرات التحكم في حجم الخط
+    let currentFontSize = 16;
+    const minFontSize = 12;
+    const maxFontSize = 24;
+
+    function changeFontSize(delta) {
+        const newSize = currentFontSize + delta;
+        if (newSize >= minFontSize && newSize <= maxFontSize) {
+            currentFontSize = newSize;
+            updateFontSize();
+        }
+    }
+
+    function updateFontSize() {
+        const captionText = document.getElementById('captionText');
+        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+        const decreaseBtn = document.getElementById('decreaseFontBtn');
+        const increaseBtn = document.getElementById('increaseFontBtn');
+
+        // تحديث حجم الخط
+        captionText.style.fontSize = `${currentFontSize}px`;
+        fontSizeDisplay.textContent = `${currentFontSize}px`;
+
+        // تحديث حالة الأزرار
+        decreaseBtn.disabled = currentFontSize <= minFontSize;
+        increaseBtn.disabled = currentFontSize >= maxFontSize;
+    }
+
+    // إضافة مستمعي الأحداث مع تأخير للبحث
+    let searchTimeout;
+    function debounceSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(filterCaptions, 300);  // تأخير 300 مللي ثانية
+    }
+
+    document.getElementById('search-input').addEventListener('input', debounceSearch);
+    document.getElementById('cc-type-filter').addEventListener('change', filterCaptions);
+    document.getElementById('sort-by').addEventListener('change', filterCaptions);
+
+    // تحميل الترجمات عند تحميل الصفحة
+    loadCaptions();
+</script>
+{% endblock %}

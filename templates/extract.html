@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+
+{% block additional_styles %}
+    .search-container {
+        background-color: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .search-box {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: center;
+    }
+
+    .url-input {
+        flex: 2;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .url-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+    }
+
+    .cc-buttons {
+        display: flex;
+        gap: 1rem;
+        flex: 1;
+    }
+
+    .submit-btn {
+        flex: 1;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.3s;
+        white-space: nowrap;
+    }
+
+    .submit-btn:hover {
+        background-color: #cc0000;
+    }
+
+    .video-info {
+        display: none;
+        background-color: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .video-info-content {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+
+    .video-thumbnail {
+        width: 320px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+
+    .video-thumbnail:hover {
+        transform: scale(1.05);
+    }
+
+    .video-details {
+        flex: 1;
+    }
+
+    .video-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .video-stats {
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .channel-name {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .channel-name:hover {
+        text-decoration: underline;
+    }
+
+    .result-container {
+        background-color: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        display: none;
+    }
+
+    .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: var(--bg-primary);
+        border-radius: 5px;
+    }
+
+    .section-title-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .direction-btn {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .direction-btn:hover {
+        background-color: var(--bg-primary);
+        border-color: var(--accent-color);
+    }
+
+    .direction-btn.active {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
+    }
+
+    .cc-box {
+        background-color: var(--bg-primary);
+        padding: 1rem;
+        border-radius: 5px;
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        direction: ltr;
+        margin-bottom: 1rem;
+    }
+
+    .cc-text {
+        white-space: pre-wrap;
+        font-family: monospace;
+        color: var(--text-primary);
+        line-height: 1.8;
+    }
+
+    .copy-btn, .save-btn {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        margin-top: 1rem;
+    }
+
+    .copy-btn {
+        display: none;
+    }
+
+    .copy-btn:hover, .save-btn:hover {
+        background-color: var(--bg-primary);
+        border-color: var(--accent-color);
+    }
+
+    .save-btn {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        width: 100%;
+    }
+
+    .save-btn:hover {
+        background-color: #45a049;
+    }
+
+    .save-btn:disabled {
+        background-color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+
+    #loading {
+        display: none;
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid var(--text-secondary);
+        border-top: 3px solid var(--accent-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    #status-message {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 5px;
+        text-align: center;
+        display: none;
+    }
+
+    .error {
+        background-color: rgba(255, 0, 0, 0.1);
+        color: #ff4444;
+    }
+
+    .success {
+        background-color: rgba(0, 255, 0, 0.1);
+        color: #44ff44;
+    }
+
+    @media (max-width: 768px) {
+        .search-box {
+            flex-direction: column;
+        }
+
+        .cc-buttons {
+            width: 100%;
+        }
+
+        .video-info-content {
+            flex-direction: column;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: auto;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="url" class="url-input" placeholder="ضع رابط فيديو اليوتيوب هنا..." onblur="fetchVideoInfo()">
+                <div class="cc-buttons">
+                    <button onclick="getCC('manual')" class="submit-btn">
+                        <i class="fas fa-closed-captioning"></i> ترجمة يدوية
+                    </button>
+                    <button onclick="getCC('auto')" class="submit-btn">
+                        <i class="fas fa-magic"></i> ترجمة تلقائية
+                    </button>
+                </div>
+            </div>
+
+            <div id="video-info" class="video-info">
+                <div class="video-info-content">
+                    <a id="thumbnail-link" target="_blank">
+                        <img id="video-thumbnail" class="video-thumbnail" alt="صورة مصغرة للفيديو">
+                    </a>
+                    <div class="video-details">
+                        <h2 id="video-title" class="video-title"></h2>
+                        <p class="video-stats">المشاهدات: <span id="video-views"></span></p>
+                        <p class="video-stats">المدة: <span id="video-duration"></span></p>
+                        <p class="video-stats">القناة: <a id="channel-link" class="channel-name" target="_blank"></a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loading">
+                <div class="loading-spinner"></div>
+                <p>جاري استخراج الترجمة...</p>
+            </div>
+
+            <div id="status-message"></div>
+
+            <div id="result-container" class="result-container">
+                <div class="section-title">
+                    <div class="section-title-right">
+                        <i class="fas fa-closed-captioning"></i>
+                        <span id="cc-type-label">الترجمة</span>
+                    </div>
+                    <div class="section-title-left">
+                        <button onclick="changeDirection('rtl')" class="direction-btn active" id="rtl-btn">
+                            <i class="fas fa-align-right"></i>
+                            RTL
+                        </button>
+                        <button onclick="changeDirection('ltr')" class="direction-btn" id="ltr-btn">
+                            <i class="fas fa-align-left"></i>
+                            LTR
+                        </button>
+                    </div>
+                </div>
+                <div class="cc-box">
+                    <pre id="cc-text" class="cc-text" dir="rtl"></pre>
+                </div>
+                <button onclick="copyText()" id="copy-btn" class="copy-btn">
+                    <i class="fas fa-copy"></i>
+                    نسخ النص
+                </button>
+                <button onclick="saveCC()" class="save-btn" id="save-btn">
+                    حفظ البيانات
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block additional_scripts %}
+    <script>
+        let currentVideoId = '';
+        let currentVideoInfo = null;
+        let currentCCType = '';
+
+        function showStatus(message, isError) {
+            const statusElement = document.getElementById('status-message');
+            statusElement.textContent = message;
+            statusElement.className = isError ? 'error' : 'success';
+            statusElement.style.display = 'block';
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function extractVideoId(url) {
+            const patterns = [
+                /(?:v=|v\/|embed\/|youtu\.be\/)([^"&?\/\s]{11})/,
+                /(?:watch\?|v=)([^"&?\/\s]{11})/,
+                /([^"&?\/\s]{11})/
+            ];
+
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) {
+                    return match[1];
+                }
+            }
+            return null;
+        }
+
+        async function fetchVideoInfo() {
+            const urlInput = document.getElementById('url');
+            const videoUrl = urlInput.value.trim();
+            
+            if (!videoUrl) return;
+            
+            const videoId = extractVideoId(videoUrl);
+            if (!videoId) {
+                showStatus('الرجاء إدخال رابط يوتيوب صحيح', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/video_info/${videoId}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showStatus(data.error, true);
+                    return;
+                }
+
+                document.getElementById('video-thumbnail').src = data.thumbnail_url;
+                document.getElementById('thumbnail-link').href = data.thumbnail_max_res;
+                document.getElementById('video-title').textContent = data.title;
+                document.getElementById('video-views').textContent = data.views;
+                document.getElementById('video-duration').textContent = data.duration;
+                document.getElementById('channel-link').textContent = data.channel_title;
+                document.getElementById('channel-link').href = data.channel_url;
+                
+                document.getElementById('video-info').style.display = 'block';
+            } catch (error) {
+                showStatus('حدث خطأ أثناء جلب معلومات الفيديو', true);
+            }
+        }
+
+        async function getCC(type) {
+            const urlInput = document.getElementById('url');
+            const youtubeUrl = urlInput.value.trim();
+            
+            if (!youtubeUrl) {
+                showStatus('الرجاء إدخال رابط الفيديو', true);
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('status-message').style.display = 'none';
+
+            try {
+                currentVideoId = extractVideoId(youtubeUrl);
+                if (!currentVideoId) {
+                    showStatus('رابط يوتيوب غير صالح', true);
+                    return;
+                }
+
+                const videoInfoResponse = await fetch(`/video_info/${currentVideoId}`);
+                const videoInfoData = await videoInfoResponse.json();
+                if (videoInfoData.error) {
+                    showStatus(videoInfoData.error, true);
+                    return;
+                }
+                currentVideoInfo = videoInfoData;
+
+                const response = await fetch('/get-cc', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `youtube_url=${encodeURIComponent(youtubeUrl)}&cc_type=${type}`
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showStatus(data.error, true);
+                } else {
+                    document.getElementById('cc-text').textContent = data.cc_text;
+                    document.getElementById('cc-type-label').textContent = `الترجمة ${data.cc_type}`;
+                    document.getElementById('result-container').style.display = 'block';
+                    document.getElementById('copy-btn').style.display = 'block';
+                    document.getElementById('save-btn').style.display = 'block';
+                    currentCCType = type;
+                }
+            } catch (error) {
+                showStatus('حدث خطأ أثناء استخراج الترجمة', true);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function changeDirection(direction) {
+            const ccText = document.getElementById('cc-text');
+            const rtlBtn = document.getElementById('rtl-btn');
+            const ltrBtn = document.getElementById('ltr-btn');
+            
+            ccText.dir = direction;
+            
+            if (direction === 'rtl') {
+                rtlBtn.classList.add('active');
+                ltrBtn.classList.remove('active');
+            } else {
+                ltrBtn.classList.add('active');
+                rtlBtn.classList.remove('active');
+            }
+        }
+
+        function copyText() {
+            const ccText = document.getElementById('cc-text').textContent;
+            navigator.clipboard.writeText(ccText).then(() => {
+                showStatus('تم نسخ النص بنجاح!', false);
+            }).catch(() => {
+                showStatus('حدث خطأ أثناء نسخ النص', true);
+            });
+        }
+
+        async function saveCC() {
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = true;
+            
+            try {
+                const ccContent = document.getElementById('cc-text').textContent;
+                
+                if (!currentVideoId || !currentVideoInfo || !ccContent || !currentCCType) {
+                    throw new Error('بيانات الفيديو غير مكتملة');
+                }
+                
+                const response = await fetch('/save-cc', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        video_id: currentVideoId,
+                        video_info: currentVideoInfo,
+                        cc_data: ccContent,
+                        cc_type: currentCCType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showStatus(data.error, true);
+                } else {
+                    showStatus(data.message, false);
+                }
+            } catch (error) {
+                showStatus(error.message || 'حدث خطأ أثناء حفظ البيانات', true);
+            } finally {
+                saveBtn.disabled = false;
+            }
+        }
+    </script>
+{% endblock %}

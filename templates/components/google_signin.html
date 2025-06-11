@@ -1,0 +1,157 @@
+<!-- Google Sign-In Popup Component -->
+<div id="googleSignInPopup" class="google-signin-popup" style="display: none;">
+    <div class="popup-content">
+        <div class="popup-header">
+            <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google Logo" class="google-logo">
+            <button onclick="closeSignInPopup()" class="close-button">&times;</button>
+        </div>
+        <div class="popup-body">
+            <h3>تسجيل الدخول مطلوب</h3>
+            <p>للوصول إلى هذه الميزة، يرجى تسجيل الدخول باستخدام حساب Google الخاص بك</p>
+            <button onclick="signInWithGoogle()" class="google-signin-button">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Icon">
+                <span>المتابعة باستخدام Google</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.google-signin-popup {
+    position: fixed;
+    top: 20px;
+    {% if request.accept_languages.best_match(['ar']) %}
+    right: 20px;
+    {% else %}
+    left: 20px;
+    {% endif %}
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 320px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.google-signin-popup.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.popup-content {
+    padding: 20px;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.google-logo {
+    height: 24px;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.close-button:hover {
+    color: #333;
+}
+
+.popup-body {
+    text-align: center;
+}
+
+.popup-body h3 {
+    margin-bottom: 10px;
+    color: #202124;
+}
+
+.popup-body p {
+    color: #5f6368;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.google-signin-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.google-signin-button:hover {
+    background-color: #f8f9fa;
+}
+
+.google-signin-button img {
+    width: 18px;
+    height: 18px;
+    margin-left: 10px;
+}
+
+.google-signin-button span {
+    color: #3c4043;
+    font-weight: 500;
+}
+</style>
+
+<script>
+function showSignInPopup() {
+    const popup = document.getElementById('googleSignInPopup');
+    popup.style.display = 'block';
+    setTimeout(() => {
+        popup.classList.add('show');
+    }, 10);
+}
+
+function closeSignInPopup() {
+    const popup = document.getElementById('googleSignInPopup');
+    popup.classList.remove('show');
+    setTimeout(() => {
+        popup.style.display = 'none';
+    }, 300);
+}
+
+function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+            return result.user.getIdToken();
+        })
+        .then((idToken) => {
+            return fetch('/auth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ idToken }),
+            });
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء تسجيل الدخول');
+        });
+}
+</script>
