@@ -1,0 +1,8 @@
+flask==2.1.0
+youtube_transcript_api==0.4.1
+python-dotenv==1.0.0
+google-api-python-client==2.86.0
+firebase-admin==6.2.0
+PyJWT
+Werkzeug
+gunicorn
